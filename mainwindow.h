@@ -28,6 +28,7 @@ private slots:
 private:
   Ui::MainWindow *mUi;
   QSystemTrayIcon *mTrayIcon;
+  QSystemTrayIcon *mMessageIcon;
 
   QTimer mTimer;
   int mTimerMinutes;

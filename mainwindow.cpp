@@ -10,16 +10,20 @@ MainWindow::MainWindow(QWidget *parent) :
   mUi->setupUi(this);
 
   mUi->mTimeSpinBox->setRange(1, 1000);
-  mUi->mTimeSpinBox->setValue(1);
+  mUi->mTimeSpinBox->setValue(30);
   updateTimerMinutes();
 
   createTrayIcon();
-  mTrayIcon->show();
 
   connect(mUi->buttonBox, &QDialogButtonBox::accepted, this, &MainWindow::okClickedSlot);
   connect(mUi->buttonBox, &QDialogButtonBox::rejected, this, &MainWindow::close);
 
   connect(&mTimer, &QTimer::timeout, this, &MainWindow::onTimeout);
+
+  stopTimer();
+
+  mTrayIcon->show();
+  mMessageIcon->show();
 }
 
 MainWindow::~MainWindow()
@@ -43,11 +47,13 @@ void MainWindow::okClickedSlot()
 void MainWindow::startTimer()
 {
   mTimer.start();
+  mUi->mStatusLabel->setText("Running");
 }
 
 void MainWindow::stopTimer()
 {
   mTimer.stop();
+  mUi->mStatusLabel->setText("Idle");
 }
 
 void MainWindow::updateTimerMinutes()
@@ -55,7 +61,7 @@ void MainWindow::updateTimerMinutes()
   if(mUi->mTimeSpinBox->value() != mTimerMinutes)
   {
     mTimerMinutes = mUi->mTimeSpinBox->value();
-    mTimer.setInterval(mTimerMinutes * 1000); // TODO set back to minutes
+    mTimer.setInterval(mTimerMinutes * 60 * 1000);
     if(mTimer.isActive())
     {
       startTimer();
@@ -65,14 +71,16 @@ void MainWindow::updateTimerMinutes()
 
 void MainWindow::onTimeout()
 {
-  std::cout << "Timeout" << std::endl;
+  mMessageIcon->showMessage("Timeout!", QString("%1 minutes have passed. Time to take a break.").arg(mTimerMinutes));
 }
 
 void MainWindow::createTrayIcon()
 {
   mTrayIcon = new QSystemTrayIcon(this);
   mTrayIcon->setIcon(QIcon(":/icons/timer_icon.png"));
-  mTrayIcon->setVisible(true);
+
+  mMessageIcon = new QSystemTrayIcon(this);
+  mMessageIcon->setIcon(QIcon(":/icons/timer_icon.png"));
 
   QMenu* trayMenu = new QMenu(this);;
   trayMenu->addAction("&Settings", this, SLOT(show()));
