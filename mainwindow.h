@@ -24,6 +24,7 @@ private slots:
   void startTimer();
   void stopTimer();
   void onTimeout();
+  void updateRemainingTimeCounter();
 
 private:
   Ui::MainWindow *mUi;
@@ -31,6 +32,7 @@ private:
   QSystemTrayIcon *mMessageIcon;
 
   QTimer mTimer;
+  QTimer mPollRemainingTimeTimer;
   int mTimerMinutes;
   bool mQuitRequested = false;
 

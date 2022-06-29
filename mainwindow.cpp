@@ -13,12 +13,16 @@ MainWindow::MainWindow(QWidget *parent) :
   mUi->mTimeSpinBox->setValue(30);
   updateTimerMinutes();
 
+  mPollRemainingTimeTimer.setInterval(5000);
+
+
   createTrayIcon();
 
   connect(mUi->buttonBox, &QDialogButtonBox::accepted, this, &MainWindow::okClickedSlot);
   connect(mUi->buttonBox, &QDialogButtonBox::rejected, this, &MainWindow::close);
 
   connect(&mTimer, &QTimer::timeout, this, &MainWindow::onTimeout);
+  connect(&mPollRemainingTimeTimer, &QTimer::timeout, this, &MainWindow::updateRemainingTimeCounter);
 
   stopTimer();
 
@@ -47,12 +51,16 @@ void MainWindow::okClickedSlot()
 void MainWindow::startTimer()
 {
   mTimer.start();
+  updateRemainingTimeCounter();
+  mPollRemainingTimeTimer.start();
   mUi->mStatusLabel->setText("Running");
 }
 
 void MainWindow::stopTimer()
 {
   mTimer.stop();
+  mPollRemainingTimeTimer.stop();
+  mUi->mRemainingTimeLabel->setText("--");
   mUi->mStatusLabel->setText("Idle");
 }
 
@@ -72,6 +80,12 @@ void MainWindow::updateTimerMinutes()
 void MainWindow::onTimeout()
 {
   mMessageIcon->showMessage("Timeout!", QString("%1 minutes have passed. Time to take a break.").arg(mTimerMinutes));
+}
+
+void MainWindow::updateRemainingTimeCounter()
+{
+  auto remainingTime = mTimer.remainingTime() / (1000 * 60);
+  mUi->mRemainingTimeLabel->setText(QString("%1 min").arg(remainingTime));
 }
 
 void MainWindow::createTrayIcon()
